@@ -4,7 +4,7 @@ Esto es Aleatorio de acuerdo a las reglas de protección de datos de las personas
 ;;;;;
 Id de la persona;Edad;Nombre;Latitud;Longitud;Distrito de procedencia
 ;;;;;
-ID_PERSONA;EDAD;NOMBRE;latitud;longitud;DISTRITO
+ID_PERSONA;EDAD;NOMBRE;LATITUD;LONGITUD;DISTRITO
 1;27;Persona 1;-12.06936566;-77.04709845;JESUS MARIA
 2;8;Persona 2;-12.08077066;-77.03323441;LINCE
 3;27;Persona 3;-12.08446261;-77.05731086;JESUS MARIA
