@@ -1,0 +1,43 @@
+html, body {
+    height: 100%;
+    margin:0;
+    padding:0;
+}
+
+
+#map{
+    height: 100%;
+}
+
+
+.centers_list{
+    position: absolute;
+    top: 10vh;
+    left: 5vw;
+    bottom: 30vh;
+    width: fit-content;
+    border: 2px solid black;
+    z-index: 5;
+    color: white;
+    background-color: #333;
+    opacity: 0.8;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+
+.centers_list > h3{
+    text-align: center;
+    padding: 2rem;
+    border-bottom: 3px solid lightblue;
+}
+
+.centers_names{
+    flex: 1;
+    padding: 2rem;
+    cursor: pointer;
+}
