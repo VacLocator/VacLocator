@@ -16,8 +16,8 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
 
 const setListener = () =>{
 
-    document.querySelectorAll(".center_individualNames").forEach((hotelName, index)=>{
-        hotelName.addEventListener("click", ()=>{
+    document.querySelectorAll(".center_individualNames").forEach((centerName, index)=>{
+        centerName.addEventListener("click", ()=>{
             google.maps.event.trigger(markers[index], "click")
         } )
 
@@ -68,6 +68,12 @@ function initMap(){
         zoom: 14
     })
 
+    //var val = document.getElementById("filter").checked;
+
+
+
+    //console.log(val);
+
     //const marker = new google.maps.Marker({
     //    position: lugar,
     //    map:map
@@ -81,6 +87,8 @@ function initMap(){
     //})
 
     var posi;
+    var filtro;
+    var valores = {lat , lng , filtro }
 
     infoWindow = new google.maps.InfoWindow();
 
@@ -100,9 +108,18 @@ function initMap(){
             };
 
             posi = pos;
-            console.log(posi);
-            document.getElementById("lat").value = posi.lat;
-            document.getElementById("lng").value = posi.lng;
+            valores.lat = pos.lat;
+            valores.lng = pos.lng;
+
+                    
+
+            
+            document.getElementById("lat").value = valores.lat;
+            document.getElementById("lng").value = valores.lng;
+            //valores.filtro = document.getElementById("filter").value;
+
+            
+            
 
             infoWindow.setPosition(pos);
             infoWindow.setContent("Ubicacion encontrada.");
@@ -118,6 +135,12 @@ function initMap(){
       handleLocationError(false, infoWindow, map.getCenter());
     }
     });
+
+    
+    
+    
+
+    
     //let html = '<h3>Centro de la Ciudad</h3>'
 
     //google.maps.event.addListener(marker, "click", ()=>{
