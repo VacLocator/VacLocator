@@ -106,9 +106,8 @@ func readCSVFromUrl(url string) ([][]string, error) {
 
 func (cli *CommandLine) CheckPopulation(ls []string) []string {
 	outls := []string{}
-
 	for _, s := range ls {
-		if MaxAmmount[s] > CurrentAmmount[NameToDistr[s]] {
+		if MaxAmmount[s] < CurrentAmmount[NameToDistr[s]] {
 			outls = append(outls, s)
 		}
 
@@ -118,7 +117,7 @@ func (cli *CommandLine) CheckPopulation(ls []string) []string {
 }
 
 //createWallet will create a wallet in the wallet file
-func (cli *CommandLine) populate() {
+func (cli *CommandLine) Populate() {
 
 	urlUsers := "https://raw.githubusercontent.com/VacLocator/VacLocator/dev/Data/personas_data_aleatoria.csv"
 	dataUsers, err := readCSVFromUrl(urlUsers)
@@ -148,14 +147,14 @@ func (cli *CommandLine) populate() {
 		val0, _ := strconv.Atoi(row[6])
 		MaxAmmount[row[2]] = val0
 		NameToDistr[row[2]] = row[5]
-		if idx == 10 {
+		if idx == 29 {
 			break
 		}
 	}
 
 	for idx, row := range dataUsers {
-		val0, _ := strconv.Atoi(row[6])
-		CurrentAmmount[row[2]] += val0
+		val0, _ := strconv.Atoi(row[1])
+		CurrentAmmount[row[5]] += val0
 
 		if idx == 10 {
 			break
@@ -296,7 +295,7 @@ func (cli *CommandLine) Run() {
 	}
 
 	if populateCmd.Parsed() {
-		cli.populate()
+		cli.Populate()
 	}
 	if checkPopulationCmd.Parsed() {
 		ls := []string{}
