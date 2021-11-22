@@ -32,14 +32,14 @@ func mostFrequent(arr []string) string {
 	return freq
 }
 
-func parametrosEleccion(cp1 m.CentroVacuna, cp2 m.CentroVacuna) float64 {
-	return math.Sqrt(math.Pow(cp1.LATITUD-cp2.LATITUD, 2) + math.Pow(cp1.LONGITUD-cp2.LONGITUD, 2))
+func parametrosEleccion(lat float64, lon float64, cp2 m.CentroVacuna) float64 {
+	return math.Sqrt(math.Pow(lat-cp2.LATITUD, 2) + math.Pow(lon-cp2.LONGITUD, 2))
 }
 
-func getReferencias(dataset []m.CentroVacuna, test_row m.CentroVacuna, aComparar int) []m.CentroVacuna {
+func getReferencias(dataset []m.CentroVacuna, lat float64, lon float64, aComparar int) []m.CentroVacuna {
 	var seleccionar []PuntosReferencia
 	for _, train_row := range dataset {
-		dist := parametrosEleccion(test_row, train_row)
+		dist := parametrosEleccion(lat, lon, train_row)
 		seleccionar = append(seleccionar, PuntosReferencia{CENTROPOB: train_row, DIST: dist})
 	}
 	var neighbors []m.CentroVacuna
@@ -79,8 +79,8 @@ func getReferencias(dataset []m.CentroVacuna, test_row m.CentroVacuna, aComparar
 	return neighbors
 }
 
-func PredictClassification(dataset []m.CentroVacuna, test_row m.CentroVacuna, aComparar int) string {
-	references := getReferencias(dataset, test_row, aComparar)
+func PredictClassification(dataset []m.CentroVacuna, lat float64, lon float64, aComparar int) string {
+	references := getReferencias(dataset, lat, lon, aComparar)
 	var output_values []string
 	for _, reference := range references {
 		output_values = append(output_values, reference.DISTRITO)
@@ -92,6 +92,8 @@ func main() {
 
 	num_threads_reading := 10
 	arrDistritos = r.GetDataSet(num_threads_reading)
+	latitud_nueva := -12.0252
+	longitud_nueva := -77.03213000000002
 
-	print(PredictClassification(arrDistritos, arrDistritos[5000], 10))
+	print(PredictClassification(arrDistritos, latitud_nueva, longitud_nueva, 10))
 }

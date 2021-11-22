@@ -61,7 +61,7 @@ func getDistritoVacu(data [][]string, num_slices int) []m.CentroVacuna {
 }
 
 func GetDataSet(num_slices int) []m.CentroVacuna {
-	url := "https://raw.githubusercontent.com/VacLocator/VacLocator/dev-ML/data/personas_data_aleatoria.csv"
+	url := "https://raw.githubusercontent.com/VacLocator/VacLocator/dev/Data/personas_data_aleatoria.csv"
 	data, err := readCSVFromUrl(url)
 	if err != nil {
 		panic(err)
