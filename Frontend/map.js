@@ -80,6 +80,8 @@ function initMap(){
     //    map:map,
     //})
 
+    var posi;
+
     infoWindow = new google.maps.InfoWindow();
 
     const locationButton = document.createElement("button");
@@ -97,6 +99,11 @@ function initMap(){
               lng: position.coords.longitude,
             };
 
+            posi = pos;
+            console.log(posi);
+            document.getElementById("lat").value = posi.lat;
+            document.getElementById("lng").value = posi.lng;
+
             infoWindow.setPosition(pos);
             infoWindow.setContent("Ubicacion encontrada.");
             infoWindow.open(map);
@@ -110,7 +117,7 @@ function initMap(){
       // Browser doesn't support Geolocation
       handleLocationError(false, infoWindow, map.getCenter());
     }
-  });
+    });
     //let html = '<h3>Centro de la Ciudad</h3>'
 
     //google.maps.event.addListener(marker, "click", ()=>{
@@ -121,6 +128,8 @@ function initMap(){
     showCentersList();
 
     setListener();
+
+    
 
     
 }
