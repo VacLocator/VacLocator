@@ -3,4 +3,7 @@ Debido al contexto de la pandemia del COVID-19, este virus ha afectado a una can
 
 ## DataSet
 https://www.datosabiertos.gob.pe/dataset/centros-de-vacunacion/resource/6a4885db-3c98-428c-abd1-811b712519e2
-![alt text](https://github.com/RafaelAnderson/imagenes/blob/master/1.png)
+![Image1](https://github.com/RafaelAnderson/imagenes/blob/master/1.png)
+
+## Arquitectura
+![Image 2](https://github.com/RafaelAnderson/imagenes/blob/master/2.png)
