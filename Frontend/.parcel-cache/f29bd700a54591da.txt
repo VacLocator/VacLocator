@@ -1,0 +1,9 @@
+8
+48Z:\TFConcu\gitjab\VacLocator\Frontend\coord.html132820829430000000 0
+52Z:\TFConcu\gitjab\VacLocator\Frontend\src\index.html132820928813445692 0
+45Z:\TFConcu\gitjab\VacLocator\Frontend\data.js132820829430000000 0
+41Z:\TFConcu\gitjab\VacLocator\Frontend\src132820928767634275 1
+43Z:\TFConcu\gitjab\VacLocator\Frontend\icons132820829430000000 1
+54Z:\TFConcu\gitjab\VacLocator\Frontend\icons\vacuna.png132820829430000000 0
+44Z:\TFConcu\gitjab\VacLocator\Frontend\map.js132820829430000000 0
+47Z:\TFConcu\gitjab\VacLocator\Frontend\style.css132820829430000000 0

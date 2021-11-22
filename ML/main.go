@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io"
 	math "math"
+	"os"
 	m "progra_conc_TF/models"
 	r "progra_conc_TF/reader"
 	tsne "progra_conc_TF/tsne"
@@ -10,12 +12,18 @@ import (
 	//"github.com/kniren/gota/dataframe"
 	"github.com/sjwhitworth/golearn/pca"
 	"gonum.org/v1/gonum/mat"
+
+	"net/http"
 )
 
 type PuntosReferencia struct {
 	CENTROPOB m.CentroVacuna
 	DIST      float64
 }
+
+var latitud float64
+
+var longitud float64
 
 var arrDistritos []m.CentroVacuna
 
@@ -89,16 +97,89 @@ func PredictClassification(dataset []m.CentroVacuna, lat float64, lon float64, a
 	return mostFrequent(output_values)
 }
 
+/*
+func requestearDatos(response http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	lat, ok1 := vars["lat"]
+
+	lng, ok2 := vars["lng"]
+
+	cod1, err1 := strconv.Atoi(lat)
+
+	cod2, err2 := strconv.Atoi(lng)
+
+	fmt.Print(cod1 + cod2)
+	if ok2 == nil {
+		fmt.Print(ok2)
+	}
+	if err1 != nil {
+		fmt.Print(err1)
+	}
+	if ok1 == nil {
+		fmt.Print(ok1)
+	}
+	if err2 != nil {
+		fmt.Print(err2)
+	} else {
+		log.Println(cod1)
+		response.Header().Set("Content-Type", "application/json	")
+
+		var oTraceGo response
+
+		jsonBytes, _ := json.MarshalIndent(oTraceGo, "", " ")
+
+		log.Println(string(jsonBytes))
+
+		io.WriteString(response, string(jsonBytes))
+	}
+
+}
+*/
+
 func main() {
+	/*
+		url :="file:///Z:/TFConcu/gitjab/VacLocator/Frontend/coord.html?lat=&lng="
+		params := (new url(url)).searchParams
+		latitud:=params.get('lat') // "n1"
+		longitud:=params.get('lng')
+	*/
+
+	//--
+	response, err := http.Get("file:///Z:/TFConcu/gitjab/VacLocator/Frontend/coord.html?lat=&lng=") //use package "net/http"
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer response.Body.Close()
+	// Copy data from the response to standard output
+	n, err1 := io.Copy(os.Stdout, response.Body) //use package "io" and "os"
+	if err != nil {
+		fmt.Println(err1)
+		return
+	}
+
+	fmt.Print(n)
+
+	//--
+
 	ls := []string{}
 	n_cantidades := []int{}
 	cantidad := true
 	num_threads_reading := 10
 	arrDistritos = r.GetDataSet(num_threads_reading)
-	latitud_nueva := -12.06702829
-	longitud_nueva := -77.0114123
+	//----
+	/*
+		latitud = requestearDatos(cantidad, r)
+		longitud = requestearDatos(cantidad, r)
+	*/
 
-	distrito_previo := PredictClassification(arrDistritos, latitud_nueva, longitud_nueva, 10)
+	/*
+		latitud_nueva := -12.06702829
+		longitud_nueva := -77.0114123
+	*/
+	//----
+	distrito_previo := PredictClassification(arrDistritos, latitud, longitud, 10)
 
 	centros_vacunacion := r.GetCentrosVacunaData(num_threads_reading)
 	for _, row := range centros_vacunacion {
