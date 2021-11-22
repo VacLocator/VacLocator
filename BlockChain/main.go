@@ -11,8 +11,7 @@ import (
 func main() {
 	gob.Register(elliptic.P256())
 	defer os.Exit(0)
-
+	ls := []string{}
 	cmd := cli.CommandLine{}
-	cmd.Run()
-
+	print(cmd.CheckPopulation(ls))
 }

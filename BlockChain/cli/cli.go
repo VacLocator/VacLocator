@@ -16,8 +16,14 @@ import (
 
 type CommandLine struct{}
 
-var currentBulkWallet string
-var nonBulkWallet string
+//Dictionary MaxAmmount[distrito]
+//Blockchain Wallet[distrito].CurrentGente -> Sale de EDADES
+//If Current >
+
+var MaxAmmount = make(map[string]int)
+var CurrentAmmount = make(map[string]int)
+var WalletsAddress = make(map[string]string)
+var NameToDistr = make(map[string]string)
 
 //printUsage will display what options are availble to the user
 func (cli *CommandLine) printUsage() {
@@ -89,7 +95,7 @@ func readCSVFromUrl(url string) ([][]string, error) {
 
 	defer resp.Body.Close()
 	reader := csv.NewReader(resp.Body)
-	reader.Comma = ','
+	reader.Comma = ';'
 	data, err := reader.ReadAll()
 	if err != nil {
 		return nil, err
@@ -98,22 +104,35 @@ func readCSVFromUrl(url string) ([][]string, error) {
 	return data, nil
 }
 
+func (cli *CommandLine) CheckPopulation(ls []string) string {
+	for _, s := range ls {
+		if MaxAmmount[s] > CurrentAmmount[NameToDistr[s]] {
+			return "Inside Ammount"
+		}
+		return "Inside Ammount"
+	}
+	return "Inside Ammount"
+}
+
 //createWallet will create a wallet in the wallet file
 func (cli *CommandLine) populate() {
-	wallets, _ := wallet.CreateWallets()
 
-	currentBulkWallet = wallets.AddWallet()
-	nonBulkWallet = wallets.AddWallet()
-	wallets.SaveFile()
-
-	fmt.Printf("People vaccinating address is: %s\n", currentBulkWallet)
-	fmt.Printf("People vaccinated addres is: %s\n", nonBulkWallet)
-
-	url := "https://raw.githubusercontent.com/Jireh01/Datos_CentroVacunacion/main/personas_10000.csv"
-	data, err := readCSVFromUrl(url)
+	urlUsers := "https://raw.githubusercontent.com/VacLocator/VacLocator/dev/Data/personas_data_aleatoria.csv"
+	dataUsers, err := readCSVFromUrl(urlUsers)
 	if err != nil {
 		panic(err)
 	}
+
+	header_size := 7
+	dataUsers = dataUsers[header_size:]
+
+	urlDistr := "https://raw.githubusercontent.com/VacLocator/VacLocator/dev/Data/Centros_vacuna_distritos.csv"
+	dataDistr, errD := readCSVFromUrl(urlDistr)
+	if errD != nil {
+		panic(errD)
+	}
+
+	dataDistr = dataDistr[header_size:]
 
 	fmt.Printf("Finished Fetching Data")
 
@@ -122,35 +141,23 @@ func (cli *CommandLine) populate() {
 
 	fmt.Println("Finished creating chain")
 
-	for idx, row := range data {
-
-		fmt.Printf("Inside Row")
-
-		if idx == 0 {
-			continue
-		}
-
-		chain := blockchain.ContinueBlockChain(nonBulkWallet)
-		defer chain.Database.Close()
-
-		rowData, err := strconv.Atoi(row[1])
-
-		if err != nil {
-			// handle error
-			fmt.Println(err)
-			os.Exit(2)
-		}
-
-		tx := blockchain.NewTransaction(nonBulkWallet, currentBulkWallet, rowData, chain)
-
-		chain.AddBlock([]*blockchain.Transaction{tx})
-		fmt.Println("Success!")
-
+	for idx, row := range dataDistr {
+		val0, _ := strconv.Atoi(row[6])
+		MaxAmmount[row[2]] = val0
+		NameToDistr[row[2]] = row[5]
 		if idx == 10 {
 			break
 		}
 	}
 
+	for idx, row := range dataUsers {
+		val0, _ := strconv.Atoi(row[6])
+		CurrentAmmount[row[2]] += val0
+
+		if idx == 10 {
+			break
+		}
+	}
 }
 
 //Creates a blockchain and awards address the coinbase
@@ -196,6 +203,7 @@ func (cli *CommandLine) Run() {
 	createWalletCmd := flag.NewFlagSet("createwallet", flag.ExitOnError)
 	listAddressesCmd := flag.NewFlagSet("listaddresses", flag.ExitOnError)
 	populateCmd := flag.NewFlagSet("populate", flag.ExitOnError)
+	checkPopulationCmd := flag.NewFlagSet("checkPopulation", flag.ExitOnError)
 
 	getBalanceAddress := getBalanceCmd.String("address", "", "The address to get balance for")
 	createBlockchainAddress := createBlockchainCmd.String("address", "", "The address to send genesis block reward to")
@@ -236,6 +244,11 @@ func (cli *CommandLine) Run() {
 		}
 	case "populate":
 		err := populateCmd.Parse(os.Args[2:])
+		if err != nil {
+			log.Panic(err)
+		}
+	case "checkpopulation":
+		err := checkPopulationCmd.Parse(os.Args[2:])
 		if err != nil {
 			log.Panic(err)
 		}
@@ -282,4 +295,9 @@ func (cli *CommandLine) Run() {
 	if populateCmd.Parsed() {
 		cli.populate()
 	}
+	if checkPopulationCmd.Parsed() {
+		ls := []string{}
+		cli.CheckPopulation(ls)
+	}
+
 }
