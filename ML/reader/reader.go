@@ -61,7 +61,7 @@ func getDistritoVacu(data [][]string, num_slices int) []m.CentroVacuna {
 }
 
 func GetDataSet(num_slices int) []m.CentroVacuna {
-	url := "https://raw.githubusercontent.com/VacLocator/VacLocator/dev-ML/data/personas_data_aleatoria.csv"
+	url := "https://raw.githubusercontent.com/VacLocator/VacLocator/dev/Data/personas_data_aleatoria.csv"
 	data, err := readCSVFromUrl(url)
 	if err != nil {
 		panic(err)
@@ -69,4 +69,52 @@ func GetDataSet(num_slices int) []m.CentroVacuna {
 	header_size := 7
 	data = data[header_size:]
 	return getDistritoVacu(data, num_slices)
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+func GetDatasetDistritos(data [][]string, num_slices int) []m.Distrito {
+	var arrData []m.Distrito
+	arrDataSlices := make([][]m.Distrito, num_slices)
+	channels := make([]chan int, num_slices)
+	for i := 0; i < num_slices; i++ {
+		channels[i] = make(chan int)
+		go func(channel chan int, indx int) {
+			dataSlice := data[len(data)*indx/num_slices : len(data)*(indx+1)/num_slices]
+			for _, row := range dataSlice {
+				val0, _ := strconv.Atoi(row[0])
+				val1, _ := strconv.Atoi(row[1])
+				val3, _ := strconv.ParseFloat(row[3], 64)
+				val4, _ := strconv.ParseFloat(row[4], 64)
+				val6, _ := strconv.Atoi(row[6])
+				arrDataSlices[indx] = append(arrDataSlices[indx], m.Distrito{
+					UBIGEO:               val0,
+					ID_CENTRO_VACUNACION: val1,
+					NOMBRE:               row[2],
+					LONGITUD:             val3,
+					LATITUD:              val4,
+					DISTRITO:             row[5],
+					CANTIDAD:             val6})
+			}
+			channel <- 777
+		}(channels[i], i)
+	}
+
+	for _, channel := range channels {
+		<-channel
+	}
+	for _, arrDataSlice := range arrDataSlices {
+		arrData = append(arrData, arrDataSlice...)
+	}
+	return arrData
+}
+
+func GetCentrosVacunaData(num_slices int) []m.Distrito {
+	url := "https://raw.githubusercontent.com/VacLocator/VacLocator/dev/Data/Centros_vacuna_distritos.csv"
+	data, err := readCSVFromUrl(url)
+	if err != nil {
+		panic(err)
+	}
+	header_size := 7
+	data = data[header_size:]
+	return GetDatasetDistritos(data, num_slices)
 }

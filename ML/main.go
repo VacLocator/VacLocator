@@ -7,6 +7,7 @@ import (
 	r "progra_conc_TF/reader"
 	tsne "progra_conc_TF/tsne"
 
+	//"github.com/kniren/gota/dataframe"
 	"github.com/sjwhitworth/golearn/pca"
 	"gonum.org/v1/gonum/mat"
 )
@@ -32,14 +33,14 @@ func mostFrequent(arr []string) string {
 	return freq
 }
 
-func parametrosEleccion(cp1 m.CentroVacuna, cp2 m.CentroVacuna) float64 {
-	return math.Sqrt(math.Pow(cp1.LATITUD-cp2.LATITUD, 2) + math.Pow(cp1.LONGITUD-cp2.LONGITUD, 2))
+func parametrosEleccion(lat float64, lon float64, cp2 m.CentroVacuna) float64 {
+	return math.Sqrt(math.Pow(lat-cp2.LATITUD, 2) + math.Pow(lon-cp2.LONGITUD, 2))
 }
 
-func getReferencias(dataset []m.CentroVacuna, test_row m.CentroVacuna, aComparar int) []m.CentroVacuna {
+func getReferencias(dataset []m.CentroVacuna, lat float64, lon float64, aComparar int) []m.CentroVacuna {
 	var seleccionar []PuntosReferencia
 	for _, train_row := range dataset {
-		dist := parametrosEleccion(test_row, train_row)
+		dist := parametrosEleccion(lat, lon, train_row)
 		seleccionar = append(seleccionar, PuntosReferencia{CENTROPOB: train_row, DIST: dist})
 	}
 	var neighbors []m.CentroVacuna
@@ -79,8 +80,8 @@ func getReferencias(dataset []m.CentroVacuna, test_row m.CentroVacuna, aComparar
 	return neighbors
 }
 
-func PredictClassification(dataset []m.CentroVacuna, test_row m.CentroVacuna, aComparar int) string {
-	references := getReferencias(dataset, test_row, aComparar)
+func PredictClassification(dataset []m.CentroVacuna, lat float64, lon float64, aComparar int) string {
+	references := getReferencias(dataset, lat, lon, aComparar)
 	var output_values []string
 	for _, reference := range references {
 		output_values = append(output_values, reference.DISTRITO)
@@ -89,9 +90,44 @@ func PredictClassification(dataset []m.CentroVacuna, test_row m.CentroVacuna, aC
 }
 
 func main() {
-
+	ls := []string{}
+	n_cantidades := []int{}
+	cantidad := true
 	num_threads_reading := 10
 	arrDistritos = r.GetDataSet(num_threads_reading)
+	latitud_nueva := -12.06702829
+	longitud_nueva := -77.0114123
 
-	print(PredictClassification(arrDistritos, arrDistritos[5000], 10))
+	distrito_previo := PredictClassification(arrDistritos, latitud_nueva, longitud_nueva, 10)
+
+	centros_vacunacion := r.GetCentrosVacunaData(num_threads_reading)
+	for _, row := range centros_vacunacion {
+		if distrito_previo == row.DISTRITO {
+			ls = append(ls, row.NOMBRE)
+			n_cantidades = append(n_cantidades, row.CANTIDAD)
+		}
+	}
+	if cantidad {
+		n := len(ls)
+		if n > 1 {
+			swapped := true
+			for swapped {
+				swapped = false
+
+				for i := 0; i < n-1; i++ {
+
+					if n_cantidades[i] > n_cantidades[i+1] {
+
+						n_cantidades[i], n_cantidades[i+1] = n_cantidades[i+1], n_cantidades[i]
+						ls[i], ls[i+1] = ls[i+1], ls[i]
+
+						swapped = true
+					}
+				}
+			}
+		}
+	}
+
+	fmt.Printf("%v", ls)
+
 }
