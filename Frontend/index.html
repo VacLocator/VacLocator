@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head> 
+    <style>
+     th, td {
+  border-style: inset;
+}
+    </style>
+
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +14,9 @@
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=
     AIzaSyC0-kvZHOoGPrbH0HcyEhajoz6D_LHV8Rg&callback=initMap"></script>
     <script src="map.js"></script>
+
+    <script src="form_logic.js"></script>
+
     <title>Google Maps API</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -16,15 +25,20 @@
         <h3>Centros de Vacunación</h3>
         <div class="centers_names" id="centers_names"></div>
     </div>
-    <form action="coord.html" method="GET" name="localiza">
+    <form>
         <label for="lat">Latitud</label>
         <input type="text" id="lat" name="lat">
         <label for="lng">Longitud</label>
         <input type="text" id="lng" name="lng">
         <label for="filter">Fltrar por NºPersonas</label>
         <input type="checkbox" value="1" id="filter" name="filter">
-        <input type="submit">
+        <button type="button" onclick="loadData()">Enviar</button>
     </form>
     <div id="map"></div>
 </body>
 </html>
+
+
+
+
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>

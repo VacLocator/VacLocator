@@ -3,17 +3,20 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	math "math"
-	"os"
+	"net/http"
 	m "progra_conc_TF/models"
 	r "progra_conc_TF/reader"
 	tsne "progra_conc_TF/tsne"
 
 	//"github.com/kniren/gota/dataframe"
+	"encoding/json"
+	"strconv"
+
+	"github.com/gorilla/mux"
 	"github.com/sjwhitworth/golearn/pca"
 	"gonum.org/v1/gonum/mat"
-
-	"net/http"
 )
 
 type PuntosReferencia struct {
@@ -97,118 +100,121 @@ func PredictClassification(dataset []m.CentroVacuna, lat float64, lon float64, a
 	return mostFrequent(output_values)
 }
 
-/*
-func requestearDatos(response http.ResponseWriter, request *http.Request) {
-	vars := mux.Vars(request)
-	lat, ok1 := vars["lat"]
+func manejadorSolicitudes() {
+	//enrutador
+	r := mux.NewRouter()
+	enableCORS(r)
+	//endpoints
+	r.HandleFunc("/lat/{latitud}/lng/{longitud}/filtro/{filtro}", buscarCercano)
+	//r.HandleFunc("/agregar", agregarCentroDeVacunacion)
 
-	lng, ok2 := vars["lng"]
-
-	cod1, err1 := strconv.Atoi(lat)
-
-	cod2, err2 := strconv.Atoi(lng)
-
-	fmt.Print(cod1 + cod2)
-	if ok2 == nil {
-		fmt.Print(ok2)
-	}
-	if err1 != nil {
-		fmt.Print(err1)
-	}
-	if ok1 == nil {
-		fmt.Print(ok1)
-	}
-	if err2 != nil {
-		fmt.Print(err2)
-	} else {
-		log.Println(cod1)
-		response.Header().Set("Content-Type", "application/json	")
-
-		var oTraceGo response
-
-		jsonBytes, _ := json.MarshalIndent(oTraceGo, "", " ")
-
-		log.Println(string(jsonBytes))
-
-		io.WriteString(response, string(jsonBytes))
-	}
-
+	log.Fatal(http.ListenAndServe(":9000", r))
 }
-*/
 
-func main() {
-	/*
-		url :="file:///Z:/TFConcu/gitjab/VacLocator/Frontend/coord.html?lat=&lng="
-		params := (new url(url)).searchParams
-		latitud:=params.get('lat') // "n1"
-		longitud:=params.get('lng')
-	*/
+func buscarCercano(response http.ResponseWriter, request *http.Request) {
+	response.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(request)
+	lat, ok := vars["latitud"]
+	lng, ok := vars["longitud"]
+	filtro, ok := vars["filtro"]
 
-	//--
-	response, err := http.Get("file:///Z:/TFConcu/gitjab/VacLocator/Frontend/coord.html?lat=&lng=") //use package "net/http"
+	fmt.Print("filtro : ")
+	fmt.Println(filtro)
 
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer response.Body.Close()
-	// Copy data from the response to standard output
-	n, err1 := io.Copy(os.Stdout, response.Body) //use package "io" and "os"
-	if err != nil {
-		fmt.Println(err1)
-		return
-	}
+	if latitud, err := strconv.ParseFloat(lat, 64); err == nil {
+		if longitud, err := strconv.ParseFloat(lng, 64); err == nil {
+			if ok {
 
-	fmt.Print(n)
+				fmt.Print("latitud : ")
+				fmt.Println(latitud)
 
-	//--
+				fmt.Print("longitud : ")
+				fmt.Println(longitud)
 
-	ls := []string{}
-	n_cantidades := []int{}
-	cantidad := true
-	num_threads_reading := 10
-	arrDistritos = r.GetDataSet(num_threads_reading)
-	//----
-	/*
-		latitud = requestearDatos(cantidad, r)
-		longitud = requestearDatos(cantidad, r)
-	*/
+				ls := []string{}
+				n_cantidades := []int{}
+				cantidad := false
+				if filtro == "1" {
+					cantidad = true
+				}
+				num_threads_reading := 10
+				arrDistritos = r.GetDataSet(num_threads_reading)
+				distrito_previo := PredictClassification(arrDistritos, latitud, longitud, 10)
 
-	/*
-		latitud_nueva := -12.06702829
-		longitud_nueva := -77.0114123
-	*/
-	//----
-	distrito_previo := PredictClassification(arrDistritos, latitud, longitud, 10)
-
-	centros_vacunacion := r.GetCentrosVacunaData(num_threads_reading)
-	for _, row := range centros_vacunacion {
-		if distrito_previo == row.DISTRITO {
-			ls = append(ls, row.NOMBRE)
-			n_cantidades = append(n_cantidades, row.CANTIDAD)
-		}
-	}
-	if cantidad {
-		n := len(ls)
-		if n > 1 {
-			swapped := true
-			for swapped {
-				swapped = false
-
-				for i := 0; i < n-1; i++ {
-
-					if n_cantidades[i] > n_cantidades[i+1] {
-
-						n_cantidades[i], n_cantidades[i+1] = n_cantidades[i+1], n_cantidades[i]
-						ls[i], ls[i+1] = ls[i+1], ls[i]
-
-						swapped = true
+				centros_vacunacion := r.GetCentrosVacunaData(num_threads_reading)
+				for _, row := range centros_vacunacion {
+					if distrito_previo == row.DISTRITO {
+						ls = append(ls, row.NOMBRE)
+						n_cantidades = append(n_cantidades, row.CANTIDAD)
 					}
 				}
+				if cantidad {
+					n := len(ls)
+					if n > 1 {
+						swapped := true
+						for swapped {
+							swapped = false
+
+							for i := 0; i < n-1; i++ {
+
+								if n_cantidades[i] > n_cantidades[i+1] {
+
+									n_cantidades[i], n_cantidades[i+1] = n_cantidades[i+1], n_cantidades[i]
+									ls[i], ls[i+1] = ls[i+1], ls[i]
+
+									swapped = true
+								}
+							}
+						}
+					}
+				}
+
+				centros := r.GetCentrosVacunaData(num_threads_reading)
+
+				fmt.Print("centros : ")
+				fmt.Println(centros)
+
+				var centrosMasCercano []m.Distrito
+
+				for _, current := range ls {
+					for _, row := range centros {
+						if current == row.NOMBRE {
+							centrosMasCercano = append(centrosMasCercano, row)
+						}
+					}
+				}
+
+				fmt.Print("distritoMasCercano : ")
+				fmt.Println(centrosMasCercano)
+
+				jsonBytes, _ := json.MarshalIndent(centrosMasCercano, "", " ")
+				io.WriteString(response, string(jsonBytes))
 			}
 		}
 	}
 
-	fmt.Printf("%v", ls)
+}
 
+func enableCORS(router *mux.Router) {
+	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}).Methods(http.MethodOptions)
+	router.Use(middlewareCors)
+}
+
+func middlewareCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, req *http.Request) {
+			// Just put some headers to allow CORS...
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+			// and call next handler!
+			next.ServeHTTP(w, req)
+		})
+}
+
+func main() {
+	manejadorSolicitudes()
 }

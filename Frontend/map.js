@@ -70,7 +70,7 @@ function initMap(){
 
     //var val = document.getElementById("filter").checked;
 
-
+//handler para mejor respuesta con el front
 
     //console.log(val);
 
