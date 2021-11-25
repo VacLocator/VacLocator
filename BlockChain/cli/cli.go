@@ -104,14 +104,17 @@ func readCSVFromUrl(url string) ([][]string, error) {
 	return data, nil
 }
 
-func (cli *CommandLine) CheckPopulation(ls []string) string {
+func (cli *CommandLine) CheckPopulation(ls []string) []string {
+	outls := []string{}
+
 	for _, s := range ls {
 		if MaxAmmount[s] > CurrentAmmount[NameToDistr[s]] {
-			return "Inside Ammount"
+			outls = append(outls, s)
 		}
-		return "Inside Ammount"
+
 	}
-	return "Inside Ammount"
+
+	return outls
 }
 
 //createWallet will create a wallet in the wallet file

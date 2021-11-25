@@ -169,6 +169,10 @@ func buscarCercano(response http.ResponseWriter, request *http.Request) {
 					}
 				}
 
+				//To DO: Envia BC lista
+				//To Do: lista = Respuesta
+				//To Do: Recibe la lista de BC
+
 				centros := r.GetCentrosVacunaData(num_threads_reading)
 
 				fmt.Print("centros : ")
