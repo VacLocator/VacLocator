@@ -9,10 +9,13 @@ import (
 	m "progra_conc_TF/models"
 	r "progra_conc_TF/reader"
 	tsne "progra_conc_TF/tsne"
+	"strings"
 
 	//"github.com/kniren/gota/dataframe"
 	"encoding/json"
 	"strconv"
+
+	"bytes"
 
 	"github.com/gorilla/mux"
 	"github.com/sjwhitworth/golearn/pca"
@@ -106,8 +109,6 @@ func manejadorSolicitudes() {
 	enableCORS(r)
 	//endpoints
 	r.HandleFunc("/lat/{latitud}/lng/{longitud}/filtro/{filtro}", buscarCercano)
-	//r.HandleFunc("/agregar", agregarCentroDeVacunacion)
-
 	log.Fatal(http.ListenAndServe(":9000", r))
 }
 
@@ -154,21 +155,56 @@ func buscarCercano(response http.ResponseWriter, request *http.Request) {
 						swapped := true
 						for swapped {
 							swapped = false
-
 							for i := 0; i < n-1; i++ {
-
 								if n_cantidades[i] > n_cantidades[i+1] {
-
 									n_cantidades[i], n_cantidades[i+1] = n_cantidades[i+1], n_cantidades[i]
 									ls[i], ls[i+1] = ls[i+1], ls[i]
-
 									swapped = true
 								}
 							}
 						}
 					}
-				}
 
+					requestBody, err := json.Marshal(ls)
+
+					log.Println(string(requestBody))
+
+					client := &http.Client{}
+					req, err := http.NewRequest(http.MethodPost, "http://localhost:9001/logic", bytes.NewBuffer(requestBody))
+					req.Header.Set("Content-type", "application/json")
+
+					if err != nil {
+						log.Fatal(err)
+					}
+
+					resp, err := client.Do(req)
+
+					if err != nil {
+						log.Fatal(err)
+
+					}
+
+					defer resp.Body.Close()
+
+					ls = nil
+
+					buf := new(bytes.Buffer)
+					buf.ReadFrom(resp.Body)
+					bodyData := buf.String()
+
+					log.Println(string(bodyData))
+
+					list := strings.Split(bodyData, ",")
+
+					for i := len(list) - 1; i >= 0; i-- {
+						data := strings.Replace(list[i], "[", "", -1)
+						data = strings.Replace(data, "]", "", -1)
+						data = strings.Replace(data, "\"", "", -1)
+						ls = append(ls, data)
+					}
+
+				}
+				//
 				//To DO: Envia BC lista
 				//To Do: lista = Respuesta
 				//To Do: Recibe la lista de BC
